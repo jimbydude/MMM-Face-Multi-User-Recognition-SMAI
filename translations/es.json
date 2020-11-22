@@ -1,6 +1,9 @@
 {
   "TITLE": "Utilice Face AI para iniciar sesión",
   "UPDATE": "Actualización",
-  "WELCOME": "Bienvenidos",
-  "GOOD_MORNING": "Buenos días"
+  "WELCOME": "Bienvenidos,",
+  "GOOD_MORNING": "Buenos días,",
+  "GOOD_AFTERNOON": "Buenas tardes,",
+  "GOOD_EVENING": "Buenas noches,",
+  "GUEST_NAME": "invitado"
  }

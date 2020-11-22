@@ -100,6 +100,7 @@ Module.register("MMM-Face-Multi-User-Recognition-SMAI", {
 	getTranslations: function() {
 		//FIXME: This can be load a one file javascript definition
 		return {
+			de: "translations/de.json",
 			en: "translations/en.json",
 			es: "translations/es.json",
 			ko: "translations/ko.json"
@@ -132,7 +133,7 @@ Module.register("MMM-Face-Multi-User-Recognition-SMAI", {
 //						Log.log("Logging out. Reset image.");
 //						
 //						this.loggedIn = false;
-//						this.userName = "Mr. Nobody";
+//						this.userName = this.translate('GUEST_NAME');
 //						this.userImage = "guest.gif";
 //						self.updateDom(100);
 //					}, 25000);
@@ -144,7 +145,7 @@ Module.register("MMM-Face-Multi-User-Recognition-SMAI", {
 				Log.log("Notificaiton: " + notification + " from Mirror. Logging out " + payload);
 				
 				this.loggedIn = false;
-				this.userName = "Mr. Nobody";
+				this.userName = this.translate('GUEST_NAME');
 				this.userImage = "guest.gif";
 				self.updateDom(100);
 				

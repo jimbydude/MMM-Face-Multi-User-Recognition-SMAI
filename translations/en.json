@@ -1,8 +1,9 @@
 {
   "TITLE": "Face AI User Login",
   "UPDATE": "Update",
-  "WELCOME": "Welcome",
-  "GOOD_MORNING": "Good Morning ",
-  "GOOD_AFTERNOON": "Good Afternoon",
-  "GOOD_EVENING": "Good Evening"
+  "WELCOME": "Welcome,",
+  "GOOD_MORNING": "Good Morning,",
+  "GOOD_AFTERNOON": "Good Afternoon,",
+  "GOOD_EVENING": "Good Evening,",
+  "GUEST_NAME": "Mr. Nobody"
  }
