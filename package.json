@@ -1,18 +1,41 @@
 {
-  "name": "MMM-Face-Multi-User-Recognition-SMAI",
-  "version": "1.0.0",
-  "description": "Todo: Insert description here!",
+  "name": "mmm-face-multi-user-recognition-smai",
+  "version": "2.0.0",
+  "description": "MagicMirror² UI module that displays personalized greetings and profile images based on face recognition notifications from MMM-Face-Reco-DNN.",
   "main": "MMM-Face-Multi-User-Recognition-SMAI.js",
-  "author": "",
+  "requiresVersion": "2.35.0",
+  "author": "James Macdonald and contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jimbydude/MMM-Face-Multi-User-Recognition-SMAI.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jimbydude/MMM-Face-Multi-User-Recognition-SMAI/issues"
+  },
+  "homepage": "https://github.com/jimbydude/MMM-Face-Multi-User-Recognition-SMAI#readme",
+  "keywords": [
+    "magicmirror-module",
+    "magicmirror",
+    "face-recognition",
+    "mmm-face-reco-dnn",
+    "smart-mirror"
+  ],
+  "engines": {
+    "node": ">=22.21.1 <23 || >=24"
+  },
+  "scripts": {
+    "lint": "npm run lint:js && npm run lint:css && npm run lint:md",
+    "lint:js": "eslint .",
+    "lint:css": "stylelint \"*.css\"",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "format": "prettier --write \"**/*.{js,json,md,css,sh}\""
+  },
   "devDependencies": {
-    "grunt": "latest",
-    "grunt-eslint": "latest",
-    "grunt-jsonlint": "latest",
-    "grunt-markdownlint": "^1.0.13",
-    "grunt-stylelint": "latest",
-    "grunt-yamllint": "latest",
-    "stylelint-config-standard": "latest",
-    "time-grunt": "latest"
+    "eslint": "^10.2.0",
+    "markdownlint-cli2": "^0.22.0",
+    "prettier": "^3.8.3",
+    "stylelint": "^17.7.0",
+    "stylelint-config-standard": "^40.0.0"
   }
 }

@@ -1,176 +1,289 @@
-/* global Module */
+/* global Log, Module, moment */
 
-/* Magic Mirror
+/* MagicMirror
  * Module: MMM-Face-Multi-User-Recognition-SMAI
  *
  * By James Macdonald
  * MIT Licensed.
  */
 
-const MORNING   = -1;
-const AFTERNOON = 0;
-const EVENING   = 1;
+const DAY_PART = {
+  MORNING: "morning",
+  AFTERNOON: "afternoon",
+  EVENING: "evening"
+};
+
 Module.register("MMM-Face-Multi-User-Recognition-SMAI", {
-	defaults: {
-		updateInterval: 10000,
-		retryDelay: 5000,
-		width: "200px",
-		position: "lower_third",
-		useMMMFaceRecoDNN: false,
-		interval: 2000,
-		morningStartTime: 3,
-		morningEndTime: 12,
-		afternoonStartTime: 12,
-		afternoonEndTime: 17,
-	},
+  defaults: {
+    updateInterval: 10000,
+    retryDelay: 5000,
+    width: "200px",
+    position: "lower_third",
+    useMMMFaceRecoDNN: true,
+    interval: 2000,
+    morningStartTime: 3,
+    morningEndTime: 12,
+    afternoonStartTime: 12,
+    afternoonEndTime: 17,
+    imageType: "jpg",
+    imageExtensions: ["jpg", "jpeg", "png", "webp", "gif"],
+    animationSpeed: 300
+  },
 
-	requiresVersion: "2.1.0", // Required version of MagicMirror
+  requiresVersion: "2.35.0",
 
-	start: function() {
-		var self = this;
-		var dataRequest = null;
-		var dataNotification = null;
-		this.userName = "Guest";
-		this.userImage = "guest.gif";
-		this.timer = null;
+  start() {
+    this.loggedIn = false;
+    this.loaded = false;
+    this.isLoading = false;
+    this.errorMessage = null;
+    this.timer = null;
+    this.userName = this.getGuestName();
+    this.userImage = "guest.gif";
+    this.currentImageSrc = "";
 
-		// Are we logged in or not
-		this.loggedIn = false;
+    this.initializeModule().catch((error) => {
+      this.errorMessage = `${this.getTranslation("ERROR_LOADING_IMAGE", "Could not load profile image.")} ${error.message}`;
+      Log.error(`[${this.name}] Failed to initialize module: ${error.message}`);
+      this.updateDom(this.config.animationSpeed);
+    });
+  },
 
-		//Flag for check if module is loaded
-		this.loaded = false;
-	},
+  async initializeModule() {
+    await this.loadUserImage(this.userImage);
+    this.loaded = true;
+    this.updateDom(this.config.animationSpeed);
+  },
 
-	// This will be called every update and update the image based on:
-	//	.userId
-	//	.userName
-	getDom: function() {
-		var self = this;
+  getDom() {
+    const wrapper = document.createElement("div");
+    wrapper.className = "face-image";
 
-		// create element wrapper for show into the module
-		var wrapper = document.createElement("div");
-		wrapper.innerHTML = this.translate('TITLE');
-		wrapper.className = "face-image";
+    const title = document.createElement("div");
+    title.className = "face-image__title";
+    title.textContent = this.getTranslation("TITLE", "Face Login");
+    wrapper.appendChild(title);
 
-		// Figure out what time of day message we want
-		var message = this.translate('WELCOME');
-		if ( this.userName !== "Guest")
-		{
-			if ( this.timeOfDay() == MORNING ) {
-				message = this.translate('GOOD_MORNING');
-			} else if (this.timeOfDay() == AFTERNOON) {
-				message = this.translate('GOOD_AFTERNOON');
-			} else {
-				message = this.translate('GOOD_EVENING');
-			}
-		}
-		
-		// Ceate the image element and show gif by default.
-		var imgHolderElement = document.createElement("p");
-		imgHolderElement.innerHTML = message + " " + this.capitalizeWords(this.userName);
-		imgHolderElement.classList.add(this.config.position);
-		imgHolderElement.style.width = this.config.width;
-		
-		// Asychronoulsy load either GIF or face (as name).
-		var img = document.createElement("img");
-		var newImg = new Image;
-		newImg.src = "modules/MMM-Face-Multi-User-Recognition-SMAI/public/" + this.userImage;
-		newImg.onload = function()
-		{
-			img.src = this.src;
-		}
-		imgHolderElement.appendChild(img);
+    if (this.errorMessage) {
+      const errorElement = document.createElement("div");
+      errorElement.className = "face-image__error";
+      errorElement.textContent = this.errorMessage;
+      wrapper.appendChild(errorElement);
+      return wrapper;
+    }
 
-		wrapper.appendChild(imgHolderElement);
-		return wrapper;
+    if (!this.loaded || this.isLoading) {
+      const loadingElement = document.createElement("div");
+      loadingElement.className = "face-image__loading";
+      loadingElement.textContent = this.getTranslation("LOADING", "Loading profile...");
+      wrapper.appendChild(loadingElement);
+      return wrapper;
+    }
 
-	},
-	
-	getScripts: function() {
-		return [];
-	},
+    const infoElement = document.createElement("div");
+    infoElement.classList.add("face-image__content", this.config.position);
+    infoElement.style.width = this.config.width;
 
-	getStyles: function () {
-		return [
-			"MMM-Face-Multi-User-Recognition-SMAI.css",
-		];
-	},
+    const greetingElement = document.createElement("p");
+    greetingElement.className = "face-image__greeting";
+    greetingElement.textContent = `${this.getGreetingMessage()} ${this.capitalizeWords(this.userName)}`;
 
-	// Load translations files
-	getTranslations: function() {
-		//FIXME: This can be load a one file javascript definition
-		return {
-			de: "translations/de.json",
-			en: "translations/en.json",
-			es: "translations/es.json",
-			ko: "translations/ko.json"
-		};
-	},
+    const img = document.createElement("img");
+    img.className = "face-image__avatar";
+    img.src = this.currentImageSrc;
+    img.alt = `${this.capitalizeWords(this.userName)} profile image`;
+    img.loading = "lazy";
 
-	notificationReceived: function(notification, payload, sender) {
-		var self = this;
+    infoElement.append(greetingElement, img);
+    wrapper.appendChild(infoElement);
 
-		// Log.log("Got Notificaiton: " + notification + " Payload: " + payload);
-		switch (notification)
-		{
-			case "USERS_LOGIN":
-			{
-				// Face Rec sends multiple notifications even if user is already logged in and logout timer still active.
-				if (this.config.useMMMFaceRecoDNN === true && this.loggedIn == false )
-				{
-					Log.log("Notificaiton: " + notification + " from Mirror. Logging in " + payload);
-					
-					// Fetch the users image.
-					this.loggedIn = true;
-					this.userName = payload;
-					this.userImage = payload + ".jpg"; //Assume for now.
-					self.updateDom(100);
+    return wrapper;
+  },
 
-					// Clear existing timer and reset.
-					// This is only required if MMM-Face-Reco-DNN module not updated with new Notification for lougout.
-//					if ( this.timer != null ) clearInterval(this.timer);
-//					this.timer = setTimeout(()=>{
-//						Log.log("Logging out. Reset image.");
-//						
-//						this.loggedIn = false;
-//						this.userName = this.translate('GUEST_NAME');
-//						this.userImage = "guest.gif";
-//						self.updateDom(100);
-//					}, 25000);
-				}
-				break;
-			}
-			case "USERS_LOGOUT_MODULES":
-			{
-				Log.log("Notificaiton: " + notification + " from Mirror. Logging out " + payload);
-				
-				this.loggedIn = false;
-				this.userName = this.translate('GUEST_NAME');
-				this.userImage = "guest.gif";
-				self.updateDom(100);
-				
-				break;
-			}
-		}		
-	},
+  getScripts() {
+    return [];
+  },
 
-	// Local helper functions
-	capitalizeWords: function(str)
-	{
-	 return str.toString().toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
-	},
-	
-	timeOfDay: function()
-	{
-		var hour = moment().hour();
-		
-		if (hour >= this.config.morningStartTime && hour < this.config.morningEndTime) {
-			return MORNING;
-		} else if (hour >= this.config.afternoonStartTime && hour < this.config.afternoonEndTime ) {
-			return AFTERNOON;
-		}
+  getStyles() {
+    return ["MMM-Face-Multi-User-Recognition-SMAI.css"];
+  },
 
-		return EVENING;
-	}
-	
+  getTranslations() {
+    return {
+      de: "translations/de.json",
+      en: "translations/en.json",
+      es: "translations/es.json",
+      ko: "translations/ko.json"
+    };
+  },
+
+  notificationReceived(notification, payload) {
+    if (!this.config.useMMMFaceRecoDNN) {
+      return;
+    }
+
+    if (notification === "USERS_LOGIN") {
+      this.handleUserLogin(payload);
+      return;
+    }
+
+    if (notification === "USERS_LOGOUT_MODULES") {
+      this.handleUserLogout(payload);
+    }
+  },
+
+  async handleUserLogin(payload) {
+    if (this.loggedIn) {
+      return;
+    }
+
+    const normalizedUser = this.normalizeUserName(payload);
+    if (!normalizedUser) {
+      this.errorMessage = this.getTranslation("INVALID_USER_PAYLOAD", "Received an invalid user payload.");
+      Log.warn(`[${this.name}] Invalid USERS_LOGIN payload: ${payload}`);
+      this.updateDom(this.config.animationSpeed);
+      return;
+    }
+
+    this.loggedIn = true;
+    this.userName = normalizedUser;
+
+    const preferredImage = `${normalizedUser}.${this.config.imageType}`;
+    await this.loadUserImage(preferredImage, normalizedUser);
+
+    Log.info(`[${this.name}] User logged in: ${normalizedUser}`);
+    this.updateDom(this.config.animationSpeed);
+  },
+
+  async handleUserLogout(payload) {
+    Log.info(`[${this.name}] User logged out: ${payload || "unknown"}`);
+
+    this.loggedIn = false;
+    this.userName = this.getGuestName();
+
+    await this.loadUserImage("guest.gif");
+    this.updateDom(this.config.animationSpeed);
+  },
+
+  async loadUserImage(fileName, baseName = "") {
+    this.isLoading = true;
+    this.errorMessage = null;
+    this.updateDom(this.config.animationSpeed);
+
+    const candidateImages = this.getCandidateImageNames(fileName, baseName);
+
+    for (const candidate of candidateImages) {
+      const source = this.file(`public/${candidate}`);
+      const exists = await this.canLoadImage(source);
+      if (exists) {
+        this.userImage = candidate;
+        this.currentImageSrc = source;
+        this.isLoading = false;
+        return;
+      }
+    }
+
+    this.isLoading = false;
+
+    if (this.loggedIn) {
+      this.errorMessage = `${this.getTranslation("ERROR_LOADING_IMAGE", "Could not load profile image for")} ${this.capitalizeWords(this.userName)}.`;
+      this.currentImageSrc = this.file("public/guest.gif");
+      return;
+    }
+
+    throw new Error(`Missing required fallback image: ${fileName}`);
+  },
+
+  getCandidateImageNames(fileName, baseName = "") {
+    const imageExtensions = Array.isArray(this.config.imageExtensions)
+      ? this.config.imageExtensions
+      : [this.config.imageType];
+
+    const candidates = new Set();
+
+    if (fileName && fileName.includes(".")) {
+      candidates.add(fileName);
+    }
+
+    if (baseName) {
+      imageExtensions.forEach((extension) => candidates.add(`${baseName}.${extension}`));
+    }
+
+    if (fileName && !fileName.includes(".")) {
+      imageExtensions.forEach((extension) => candidates.add(`${fileName}.${extension}`));
+    }
+
+    if (!this.loggedIn) {
+      candidates.add("guest.gif");
+    }
+
+    return [...candidates];
+  },
+
+  canLoadImage(source) {
+    return new Promise((resolve) => {
+      const image = new Image();
+      image.onload = () => resolve(true);
+      image.onerror = () => resolve(false);
+      image.src = source;
+    });
+  },
+
+  normalizeUserName(name) {
+    if (typeof name !== "string") {
+      return "";
+    }
+
+    return name.trim();
+  },
+
+  getGuestName() {
+    return this.getTranslation("GUEST_NAME", "Guest");
+  },
+
+  getGreetingMessage() {
+    if (!this.loggedIn) {
+      return this.getTranslation("WELCOME", "Welcome,");
+    }
+
+    const dayPart = this.timeOfDay();
+    if (dayPart === DAY_PART.MORNING) {
+      return this.getTranslation("GOOD_MORNING", "Good Morning,");
+    }
+
+    if (dayPart === DAY_PART.AFTERNOON) {
+      return this.getTranslation("GOOD_AFTERNOON", "Good Afternoon,");
+    }
+
+    return this.getTranslation("GOOD_EVENING", "Good Evening,");
+  },
+
+  getTranslation(key, fallbackText) {
+    const translated = this.translate(key);
+    return translated === key ? fallbackText : translated;
+  },
+
+  capitalizeWords(value) {
+    return value
+      .toString()
+      .toLowerCase()
+      .split(" ")
+      .filter(Boolean)
+      .map((word) => `${word.charAt(0).toUpperCase()}${word.substring(1)}`)
+      .join(" ");
+  },
+
+  timeOfDay() {
+    const hour = moment().hour();
+
+    if (hour >= this.config.morningStartTime && hour < this.config.morningEndTime) {
+      return DAY_PART.MORNING;
+    }
+
+    if (hour >= this.config.afternoonStartTime && hour < this.config.afternoonEndTime) {
+      return DAY_PART.AFTERNOON;
+    }
+
+    return DAY_PART.EVENING;
+  }
 });

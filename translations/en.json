@@ -5,5 +5,8 @@
   "GOOD_MORNING": "Good Morning,",
   "GOOD_AFTERNOON": "Good Afternoon,",
   "GOOD_EVENING": "Good Evening,",
-  "GUEST_NAME": "Mr. Nobody"
- }
+  "GUEST_NAME": "Guest",
+  "LOADING": "Loading profile...",
+  "ERROR_LOADING_IMAGE": "Could not load profile image for",
+  "INVALID_USER_PAYLOAD": "Received an invalid user payload."
+}

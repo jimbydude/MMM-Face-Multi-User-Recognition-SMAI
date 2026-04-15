@@ -1,87 +1,153 @@
 # MMM-Face-Multi-User-Recognition-SMAI
-This is a module for the [MagicMirror²](https://github.com/MichMich/MagicMirror/) to add face recognition.
-This module uses [OpenCV face-recognition with DNN](https://github.com/nischi/MMM-Face-Reco-DNN) to handle the user profile recognition. It will show/hide modules based on classes and can handle multiple users.
 
+A modernized [MagicMirror²](https://github.com/MagicMirrorOrg/MagicMirror) module that displays a user profile image and time-based greeting when face-recognition login events are received.
 
-It is a fork of Eben Kouaos https://github.com/EbenKouao/MMM-Face-Recognition-SMAI. See his other projects at https://smartbuilds.io/
+This module is a **UI layer** for [MMM-Face-Reco-DNN](https://github.com/nischi/MMM-Face-Reco-DNN), which performs the actual face detection/recognition.
 
-## How it works
-This module allows you to access profiles using face recognition. This works on the back of MMM-Face-Reco-DNN/OpenCV face recognition module.
+## Compatibility
 
-When a user is detected and logged in by Face Recognition Module a notification is recieved that will trigger the users profile pic ot be displayed
-until the user is logged out by MMM-Face-Reco-DNN
+- MagicMirror²: **>= 2.35.0**
+- Node.js: **>= 22.21.1 < 23 OR >= 24**
+- npm: **>= 10** (recommended)
 
-## Screenshots
-| ![FaceID Guest](img/readme/face-recognition-guest-smai.png) | ![Face ID Detected](img/readme/face-recognition-stark-smai.png) | 
-|---|---|
-| A guest profile as default | User has been recognised |
+## Features
 
-'Screenshots from Ebens Module'
+- Personalized greeting messages (morning/afternoon/evening)
+- Guest fallback state when no user is logged in
+- Loading and error states in the UI
+- Supports multiple image extensions (`jpg`, `jpeg`, `png`, `webp`, `gif`)
+- Translation support (`en`, `de`, `es`, `ko`)
 
-## Preconditions
+## Installation
 
-* MagicMirror<sup>2</sup> instance
-* Node.js version >= 7
-* npm
-* [OpenCV face-recognition with DNN](https://github.com/nischi/MMM-Face-Reco-DNN)
-* Raspberry Pi 4 Camera Module
+### Step 1: Clone into your MagicMirror modules directory
 
-Make sure to complete MMM-Face-Reco-DNN setup including adding classes for showing and hiding to your config before proceding.
-
-## Step 1 – Install the module
-In your MagicMirror directory:
-
-```bash cd modules
-   git clone https://github.com/jimbydude/MMM-Face-Multi-User-Recognition-SMAI.git
-   cd MMM-Face-Multi-User-Recognition-SMAI
-   npm install
+```bash
+cd ~/MagicMirror/modules
+git clone https://github.com/jimbydude/MMM-Face-Multi-User-Recognition-SMAI.git
+cd MMM-Face-Multi-User-Recognition-SMAI
 ```
 
-## Step 2 – Add files to the Config.js
-Here is an example for an entry in `config.js`
+### Step 2: Install dependencies
 
-```javascript
+Option A (recommended):
+
+```bash
+./install.sh
+```
+
+Option B (manual):
+
+```bash
+npm install
+```
+
+### Step 3: Add module config to `config/config.js`
+
+```js
 {
   module: "MMM-Face-Multi-User-Recognition-SMAI",
   position: "top_right",
   config: {
-    useMMMFaceRecoDNN: true
+    useMMMFaceRecoDNN: true,
+    width: "220px",
+    position: "center",
+    imageType: "jpg",
+    imageExtensions: ["jpg", "jpeg", "png", "webp", "gif"],
+    morningStartTime: 3,
+    morningEndTime: 12,
+    afternoonStartTime: 12,
+    afternoonEndTime: 17,
+    animationSpeed: 300
   }
-},
+}
 ```
 
-## Step 3 – Configuring the Face Recognition Structure
-**Pre-requisite:** Follow isntructions in OpenCV Installation to setup your dataset with images.
+### Step 4: Ensure image assets exist
 
-This module assumes a few things:
-* The default gif is in 'Public' folder
-* There is an image for each user in the 'Public' folder that matches with user directory names in OpenCV Dataset
+Put images in:
 
-For example if you have the following structure containing your image set in OpenCV module:
-```
-- dataset
-  - james
-    - img01.jpg
-    - img02.jpg
-    - img03.jpg
-  - roseann
-    - img01.jpg
-    - img02.jpg
-    - img03.jpg
+```text
+modules/MMM-Face-Multi-User-Recognition-SMAI/public/
 ```
 
-Then you will also have the following in the 'Public' folder of this module:
-```
-- public
-    - guest.gif
-    - james.jpg
-    - roseann.jpg
+Expected example structure:
+
+```text
+public/
+  guest.gif
+  james.jpg
+  roseann.png
 ```
 
-These images are the ones that will be shown on the mirror UI when a user logs in, not the ones from dataset. Those are only to train the NN.
+The image base name should match the username emitted by `MMM-Face-Reco-DNN` in the `USERS_LOGIN` notification.
 
 ## Configuration options
 
-| Option           | Description
-|----------------- |-----------
-| `useMMMFaceRecoDNN`        | *Required* Use the DNN deetction type. Currently only supported type. <br><br>**Type:** `bool` <br>Default true
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `useMMMFaceRecoDNN` | `boolean` | `true` | Enables reaction to DNN face recognition notifications. |
+| `width` | `string` | `"200px"` | Width for the content container. |
+| `position` | `string` | `"lower_third"` | Alignment class used in the module (`left`, `center`, `right`, etc.). |
+| `imageType` | `string` | `"jpg"` | Preferred extension for user image lookup. |
+| `imageExtensions` | `string[]` | `['jpg','jpeg','png','webp','gif']` | Extensions searched when loading user avatars. |
+| `morningStartTime` | `number` | `3` | Start hour (24h) of morning greeting. |
+| `morningEndTime` | `number` | `12` | End hour (24h) of morning greeting. |
+| `afternoonStartTime` | `number` | `12` | Start hour (24h) of afternoon greeting. |
+| `afternoonEndTime` | `number` | `17` | End hour (24h) of afternoon greeting. |
+| `animationSpeed` | `number` | `300` | DOM update animation speed in ms. |
+| `updateInterval` | `number` | `10000` | Retained for compatibility. |
+| `retryDelay` | `number` | `5000` | Retained for compatibility. |
+| `interval` | `number` | `2000` | Retained for compatibility. |
+
+## Notifications consumed
+
+- `USERS_LOGIN` — payload expected to be a user name string
+- `USERS_LOGOUT_MODULES` — logs out active user and returns to guest state
+
+## Development scripts
+
+```bash
+npm run lint
+npm run lint:js
+npm run lint:css
+npm run lint:md
+npm run format
+```
+
+## Troubleshooting
+
+### Module shows loading forever
+
+- Check that `public/guest.gif` exists.
+- Confirm file permissions allow MagicMirror to read the file.
+- Open the browser dev console and look for module errors.
+
+### User image does not appear
+
+- Confirm the username from `USERS_LOGIN` exactly matches the image filename base.
+- Ensure one of the configured extensions exists in `public/`.
+- Example: username `james` can match `james.jpg`, `james.png`, etc.
+
+### No login updates are shown
+
+- Verify `MMM-Face-Reco-DNN` is installed and running.
+- Confirm this module is loaded in `config.js`.
+- Keep `useMMMFaceRecoDNN: true`.
+
+### Node version mismatch / npm install fails
+
+- Check Node version: `node -v`
+- Install a compatible Node release:
+  - `>= 22.21.1 < 23`, or
+  - `>= 24`
+
+## Credits
+
+- Original module by James Macdonald
+- Based on prior work from Eben Kouao: [MMM-Face-Recognition-SMAI](https://github.com/EbenKouao/MMM-Face-Recognition-SMAI)
+- Integrates with MMM-Face-Reco-DNN by nischi
+
+## License
+
+MIT

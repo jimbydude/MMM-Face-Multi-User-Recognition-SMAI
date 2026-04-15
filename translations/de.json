@@ -1,9 +1,12 @@
 {
   "TITLE": "Einloggen durch Gesichtserkennungs-KI",
-  "UPDATE": "Update",
+  "UPDATE": "Aktualisieren",
   "WELCOME": "Willkommen,",
   "GOOD_MORNING": "Guten Morgen,",
   "GOOD_AFTERNOON": "Guten Tag,",
   "GOOD_EVENING": "Guten Abend,",
-  "GUEST_NAME": "Gast"
+  "GUEST_NAME": "Gast",
+  "LOADING": "Profil wird geladen...",
+  "ERROR_LOADING_IMAGE": "Profilbild konnte nicht geladen werden für",
+  "INVALID_USER_PAYLOAD": "Ungültige Benutzerdaten empfangen."
 }

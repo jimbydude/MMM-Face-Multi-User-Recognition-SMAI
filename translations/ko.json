@@ -1,9 +1,12 @@
 {
   "TITLE": "Face AI를 사용하여 로그인",
-  "UPDATE": "최신 정보",
-  "WELCOME": "어서 오십시오",
-  "GOOD_MORNING": "좋은 아침",
-  "GOOD_AFTERNOON": "안녕하세요",
-  "GOOD_EVENING": "안녕하세요",
-  "GUEST_NAME": "손님"
- }
+  "UPDATE": "업데이트",
+  "WELCOME": "환영합니다,",
+  "GOOD_MORNING": "좋은 아침입니다,",
+  "GOOD_AFTERNOON": "좋은 오후입니다,",
+  "GOOD_EVENING": "좋은 저녁입니다,",
+  "GUEST_NAME": "손님",
+  "LOADING": "프로필을 불러오는 중...",
+  "ERROR_LOADING_IMAGE": "다음 사용자의 프로필 이미지를 불러올 수 없습니다:",
+  "INVALID_USER_PAYLOAD": "유효하지 않은 사용자 데이터가 전달되었습니다."
+}

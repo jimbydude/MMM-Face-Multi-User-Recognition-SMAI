@@ -1,42 +1,71 @@
 /*
- *
  * MMM-Face-Multi-User-Recognition-SMAI
- *
- * 
  * MIT Licensed.
- *
- * Custom here your css module
- *
  */
+
 .face-image {
-    width: 200px;
-    height: auto;
+  --face-border-color: rgb(221 221 221);
+  --face-text-color: var(--color-text, #fff);
+  --face-muted-color: rgb(255 255 255 / 70%);
+  --face-error-color: #ff7070;
+
+  width: min(100%, 220px);
+  font-size: 1rem;
+  color: var(--face-text-color);
 }
 
-.face-image img {
-    /*width: 100%*/
-    
-    width: 70%;
-    height: auto;
-	border: 1px solid #DDDDDD;      
-	border-radius: 20% 20% 20% 20%;      
-	padding: 4px; 
--webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
+.face-image__title {
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.face-image__loading,
+.face-image__error {
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.face-image__loading {
+  color: var(--face-muted-color);
+}
+
+.face-image__error {
+  color: var(--face-error-color);
+}
+
+.face-image__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.face-image__content.left {
+  align-items: flex-start;
+}
+
+.face-image__content.center {
+  align-items: center;
+}
+
+.face-image__content.right {
+  align-items: flex-end;
+}
+
+.face-image__greeting {
+  margin: 0;
+  font-size: 0.95rem;
+  text-wrap: balance;
+}
+
+.face-image__avatar {
+  width: clamp(96px, 70%, 180px);
+  height: auto;
+  border: 1px solid var(--face-border-color);
+  border-radius: 20%;
+  padding: 4px;
   filter: grayscale(80%);
-}
-
-.face-image {
-    font-size: 16px;
-}
-
-.face-image.left {
-    margin: 0 auto 0 0;
-}
-
-.face-image.center {
-    margin: 0 auto;
-}
-
-.face-image.right {
-    margin: 0 0 0 auto;
+  object-fit: cover;
 }

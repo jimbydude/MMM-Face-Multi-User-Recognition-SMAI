@@ -1,9 +1,12 @@
 {
   "TITLE": "Utilice Face AI para iniciar sesión",
   "UPDATE": "Actualización",
-  "WELCOME": "Bienvenidos,",
+  "WELCOME": "Bienvenido,",
   "GOOD_MORNING": "Buenos días,",
   "GOOD_AFTERNOON": "Buenas tardes,",
   "GOOD_EVENING": "Buenas noches,",
-  "GUEST_NAME": "invitado"
- }
+  "GUEST_NAME": "Invitado",
+  "LOADING": "Cargando perfil...",
+  "ERROR_LOADING_IMAGE": "No se pudo cargar la imagen de perfil para",
+  "INVALID_USER_PAYLOAD": "Se recibió una carga de usuario no válida."
+}
